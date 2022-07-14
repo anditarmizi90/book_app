@@ -1,5 +1,5 @@
+import 'package:book_app/views/book_list_page.dart';
 import 'package:flutter/material.dart';
-import 'package:book_app/home_pages.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const BookListPage(),
     );
   }
 }
