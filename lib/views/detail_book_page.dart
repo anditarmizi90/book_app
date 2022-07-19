@@ -165,22 +165,25 @@ class _DetailBookPageState extends State<DetailBookPage> {
                               itemBuilder: (context, index) {
                                 final current =
                                     controller.similiarBooks!.books![index];
-                                return Column(
-                                  children: [
-                                    Image.network(
-                                      current.image!,
-                                      height: 100,
-                                    ),
-                                    Text(
-                                      current.title!,
-                                      textAlign: TextAlign.center,
-                                      maxLines: 3,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                        fontSize: 12,
+                                return SizedBox(
+                                  width: 100,
+                                  child: Column(
+                                    children: [
+                                      Image.network(
+                                        current.image!,
+                                        height: 100,
                                       ),
-                                    )
-                                  ],
+                                      Text(
+                                        current.title!,
+                                        maxLines: 2,
+                                        textAlign: TextAlign.center,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                        ),
+                                      )
+                                    ],
+                                  ),
                                 );
                               },
                             ),
