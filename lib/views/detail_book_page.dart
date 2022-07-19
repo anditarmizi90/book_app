@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:book_app/models/book_detail_response.dart';
+import 'package:book_app/views/image_view_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
@@ -52,8 +53,115 @@ class _DetailBookPageState extends State<DetailBookPage> {
       ),
       body: detailBook == null
           ? Center(child: CircularProgressIndicator())
-          : Column(
-              children: [],
+          : Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Column(
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  ImageViewScreen(imageUrl: detailBook!.image!),
+                            ),
+                          );
+                        },
+                        child: Image.network(
+                          detailBook!.image!,
+                          height: 150,
+                        ),
+                      ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 12.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                detailBook!.title!,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                detailBook!.authors!,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              Row(
+                                children: List.generate(
+                                  5,
+                                  (index) => Icon(
+                                    Icons.star,
+                                    color:
+                                        index < int.parse(detailBook!.rating!)
+                                            ? Colors.yellow
+                                            : Colors.grey,
+                                  ),
+                                ),
+                              ),
+                              Text(
+                                detailBook!.subtitle!,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                              Text(
+                                detailBook!.price!,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.green[600],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Container(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {},
+                      child: Text("BUY"),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Text(detailBook!.desc!),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text("Years : " + detailBook!.year!),
+                      Text("ISBN" + detailBook!.isbn13!),
+                      Text(detailBook!.pages! + " Page"),
+                      Text("Language : " + detailBook!.language!),
+                      Text("Publisher : " + detailBook!.publisher!),
+                      // Text(detailBook!.rating!),
+                    ],
+                  ),
+                ],
+              ),
             ),
     );
   }
