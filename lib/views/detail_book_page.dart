@@ -1,12 +1,14 @@
 import 'dart:convert';
 
+import 'package:book_app/controllers/book_controller.dart';
 import 'package:book_app/models/book_detail_response.dart';
+import 'package:book_app/models/book_list_response.dart';
+import 'package:book_app/views/book_list_page.dart';
 import 'package:book_app/views/image_view_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class DetailBookPage extends StatefulWidget {
   const DetailBookPage({
@@ -20,27 +22,13 @@ class DetailBookPage extends StatefulWidget {
 }
 
 class _DetailBookPageState extends State<DetailBookPage> {
-  BookDetailResponse? detailBook;
-  fetchDetailBookApi() async {
-    var url = Uri.parse('https://api.itbook.store/1.0/books/${widget.isbn}');
-    var response = await http.get(url);
-    print('Response status: ${response.statusCode}');
-    print('Response body: ${response.body}');
-
-    if (response.statusCode == 200) {
-      final jsonDetail = jsonDecode(response.body);
-      detailBook = BookDetailResponse.fromJson(jsonDetail);
-      setState(() {});
-    }
-
-    // print(await http.read(Uri.parse('https://example.com/foobar.txt')));
-  }
-
+  BookController? controller;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    fetchDetailBookApi();
+    controller = Provider.of<BookController>(context, listen: false);
+    controller!.fetchDetailBookApi(widget.isbn);
   }
 
   @override
@@ -51,118 +39,167 @@ class _DetailBookPageState extends State<DetailBookPage> {
           'Detail',
         ),
       ),
-      body: detailBook == null
-          ? Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Column(
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  ImageViewScreen(imageUrl: detailBook!.image!),
-                            ),
-                          );
-                        },
-                        child: Image.network(
-                          detailBook!.image!,
-                          height: 150,
-                        ),
-                      ),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.only(bottom: 12.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                detailBook!.title!,
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
+      body: Consumer<BookController>(builder: (context, controller, child) {
+        return controller.detailBook == null
+            ? Center(child: CircularProgressIndicator())
+            : Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Column(
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ImageViewScreen(
+                                    imageUrl: controller.detailBook!.image!),
                               ),
-                              Text(
-                                detailBook!.authors!,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              Row(
-                                children: List.generate(
-                                  5,
-                                  (index) => Icon(
-                                    Icons.star,
-                                    color:
-                                        index < int.parse(detailBook!.rating!)
-                                            ? Colors.yellow
-                                            : Colors.grey,
-                                  ),
-                                ),
-                              ),
-                              Text(
-                                detailBook!.subtitle!,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                              Text(
-                                detailBook!.price!,
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.green[600],
-                                ),
-                              ),
-                            ],
+                            );
+                          },
+                          child: Image.network(
+                            controller.detailBook!.image!,
+                            height: 150,
                           ),
                         ),
-                      )
-                    ],
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Container(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      child: Text("BUY"),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.only(bottom: 12.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  controller.detailBook!.title!,
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  controller.detailBook!.authors!,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Row(
+                                  children: List.generate(
+                                    5,
+                                    (index) => Icon(
+                                      Icons.star,
+                                      color: index <
+                                              int.parse(controller
+                                                  .detailBook!.rating!)
+                                          ? Colors.yellow
+                                          : Colors.grey,
+                                    ),
+                                  ),
+                                ),
+                                Text(
+                                  controller.detailBook!.subtitle!,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                                Text(
+                                  controller.detailBook!.price!,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.green[600],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      ],
                     ),
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Text(detailBook!.desc!),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text("Years : " + detailBook!.year!),
-                      Text("ISBN" + detailBook!.isbn13!),
-                      Text(detailBook!.pages! + " Page"),
-                      Text("Language : " + detailBook!.language!),
-                      Text("Publisher : " + detailBook!.publisher!),
-                      // Text(detailBook!.rating!),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Container(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(),
+                        onPressed: () async {
+                          Uri uri = Uri.parse(controller.detailBook!.url!);
+                          try {
+                            (await canLaunchUrl(uri))
+                                ? launchUrl(uri)
+                                : print("Tidak BErhasil Navigasi...!!!");
+                          } catch (e) {}
+                        },
+                        child: Text("BUY"),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Text(controller.detailBook!.desc!),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text("Years : " + controller.detailBook!.year!),
+                        Text("ISBN" + controller.detailBook!.isbn13!),
+                        Text(controller.detailBook!.pages! + " Page"),
+                        Text("Language : " + controller.detailBook!.language!),
+                        Text(
+                            "Publisher : " + controller.detailBook!.publisher!),
+                        // Text(detailBook!.rating!),
+                      ],
+                    ),
+                    Divider(),
+                    controller.similiarBooks == null
+                        ? CircularProgressIndicator()
+                        : Container(
+                            height: 180,
+                            child: ListView.builder(
+                              // shrinkWrap: true,
+                              scrollDirection: Axis.horizontal,
+                              itemCount:
+                                  controller.similiarBooks!.books!.length,
+                              // physics: NeverScrollableScrollPhysics(),
+                              itemBuilder: (context, index) {
+                                final current =
+                                    controller.similiarBooks!.books![index];
+                                return Container(
+                                  width: 80,
+                                  child: Column(
+                                    children: [
+                                      Image.network(
+                                        current.image!,
+                                        height: 100,
+                                      ),
+                                      Text(
+                                        current.title!,
+                                        textAlign: TextAlign.center,
+                                        maxLines: 3,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                          )
+                  ],
+                ),
+              );
+      }),
     );
   }
 }
